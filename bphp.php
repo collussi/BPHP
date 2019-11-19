@@ -1,6 +1,6 @@
 <?php
 /* =====================================================================
-   BPHP 3.2.1 - Biblioteca PHP
+    BPHP 3.2.2 - Biblioteca PHP
    Site oficial: https://github.com/arthurbonora/BPHP/
    As coletaneas de codigos terão seus creditos expressamente publicados 
 ========================================================================*/
@@ -29,11 +29,11 @@ function Bcontdiasuteis($datainicial,$datafinal=null){
 		$diai = $segundos_datainicial+($i*3600*24);
 		$w = date('w',$diai);
 		if ($w==0){
-			//echo date('d/m/Y',$diai)." é Domingo<br />";
+			//echo date('d/m/Y',$diai)." É Domingo<br />";
 		}elseif($w==6){
-			//echo date('d/m/Y',$diai)." é Sábado<br />";
+			//echo date('d/m/Y',$diai)." É Sábado<br />";
 		}else{
-			//echo date('d/m/Y',$diai)." é dia útil<br />";
+			//echo date('d/m/Y',$diai)." É dia útil<br />";
 			$uteis++;
 		}
 	}
@@ -84,26 +84,84 @@ function Beditor () {
 function Bfavicon ($patchimg) {
 	echo "<link href='".$patchimg."' rel='icon' type='image/x-icon' />";
 }	
-function Bgeracodbarras ($string) {
-?>
-    <script type="text/javascript" src="bytescoutbarcode128_1.00.07.js"></script> 
-    <img id="barcodeImage" style="border:0px;"/>
-	</p>
-    <script type="text/javascript">
-   	function updateBarcode() {
-		var barcode = new bytescoutbarcode128();
-		var value = <?php echo $string; ?>;
-   		barcode.valueSet(value);
-   		barcode.setMargins(5, 5, 5, 5);
-   		barcode.setBarWidth(2);
-   		var width = barcode.getMinWidth();
-   		barcode.setSize(width, 100);
-   		var barcodeImage = document.getElementById('barcodeImage');
-   		barcodeImage.src = barcode.exportToBase64(width, 100, 0);
-   	}
-    </script>
-<?php
+
+//Gerador de código de barras
+//Função criada por Maurício
+//Implementada por Gustavo Collussi
+
+function Bgeracodbarras($numero) {
+	$fino = 1;
+	$largo = 3;
+	$altura = 50;
+	
+	$barcodes[0] = '00110';
+	$barcodes[1] = '10001';
+	$barcodes[2] = '01001';
+	$barcodes[3] = '11000';
+	$barcodes[4] = '00101';
+	$barcodes[5] = '10100';
+	$barcodes[6] = '01100';
+	$barcodes[7] = '00011';
+	$barcodes[8] = '10010';
+	$barcodes[9] = '01010';
+	
+	for($f1 = 9; $f1 >= 0; $f1--){
+		for($f2 = 9; $f2 >= 0; $f2--){
+			$f = ($f1*10)+$f2;
+			$texto = '';
+			for($i = 1; $i < 6; $i++){
+				$texto .= substr($barcodes[$f1], ($i-1), 1).substr($barcodes[$f2] ,($i-1), 1);
+			}
+			$barcodes[$f] = $texto;
+		}
+	}
+	
+	echo '<img src="imagens_boleto/p.gif" width="'.$fino.'" height="'.$altura.'" border="0" />';
+	echo '<img src="imagens_boleto/b.gif" width="'.$fino.'" height="'.$altura.'" border="0" />';
+	echo '<img src="imagens_boleto/p.gif" width="'.$fino.'" height="'.$altura.'" border="0" />';
+	echo '<img src="imagens_boleto/b.gif" width="'.$fino.'" height="'.$altura.'" border="0" />';
+	
+	echo '<img ';
+	
+	$texto = $numero;
+	
+	if((strlen($texto) % 2) <> 0){
+		$texto = '0'.$texto;
+	}
+	
+	while(strlen($texto) > 0){
+		$i = round(substr($texto, 0, 2));
+		$texto = substr($texto, strlen($texto)-(strlen($texto)-2), (strlen($texto)-2));
+		
+		if(isset($barcodes[$i])){
+			$f = $barcodes[$i];
+		}
+		
+		for($i = 1; $i < 11; $i+=2){
+			if(substr($f, ($i-1), 1) == '0'){
+				  $f1 = $fino ;
+			  }else{
+				  $f1 = $largo ;
+			  }
+			  
+			  echo 'src="imagens_boleto/p.gif" width="'.$f1.'" height="'.$altura.'" border="0">';
+			  echo '<img ';
+			  
+			  if(substr($f, $i, 1) == '0'){
+				$f2 = $fino ;
+			}else{
+				$f2 = $largo ;
+			}
+			
+			echo 'src="imagens_boleto/b.gif" width="'.$f2.'" height="'.$altura.'" border="0">';
+			echo '<img ';
+		}
+	}
+	echo 'src="imagens_boleto/p.gif" width="'.$largo.'" height="'.$altura.'" border="0" />';
+	echo '<img src="imagens_boleto/b.gif" width="'.$fino.'" height="'.$altura.'" border="0" />';
+	echo '<img src="imagens_boleto/p.gif" width="1" height="'.$altura.'" border="0" />';
 }
+
 function Bhash($string) {
 	$hash___ = sha1($string);
 	$hash__  = sha1($hash___);
